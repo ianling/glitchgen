@@ -1,0 +1,22 @@
+<html>
+<head>
+    <link rel="stylesheet" type="=text/css" href="{{ url_for('static', filename='index.css') }}">
+    <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
+</head>
+<body>
+    <div id="formdiv">
+        <form id="form" action="/generate" method="POST" onSubmit="return generate(event)">
+            <label for="rows">Rows</label>
+            <input type="text" data-type="int" id="rows" name="rows">
+            <br>
+            <label for="columns">Columns</label>
+            <input type="text" data-type="int" id="columns" name="columns">
+            <button id="submit">Generate</button>
+        </form>
+    </div>
+    
+    <div id="imageDiv">
+        <img id="image"/>
+    </div>
+</body>
+</html>
