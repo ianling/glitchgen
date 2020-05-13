@@ -29,7 +29,7 @@ The `/generate` endpoint accepts POST requests with JSON payloads and returns a 
 
 Example JSON payload (with comments):
 
-```json
+```hjson
 {
     # number of rows of sprites. integer
     "rows": 10,
@@ -49,6 +49,7 @@ Example JSON payload (with comments):
 
 # todo
 To-do list in no particular order:
-    - overlap multiple full grids with each other
-    - random chance to overlap individual sprites (like a "corruptor" or something)
-    - multiple colors in each sprite
+
+- overlap multiple full grids with each other
+- random chance to overlap individual sprites (like a "corruptor" or something)
+- multiple colors in each sprite
