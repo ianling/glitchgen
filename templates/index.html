@@ -1,16 +1,30 @@
 <html>
 <head>
-    <link rel="stylesheet" type="=text/css" href="{{ url_for('static', filename='index.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='index.css') }}">
     <script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script>
 </head>
 <body>
     <div id="formdiv">
         <form id="form" action="/generate" method="POST" onSubmit="return generate(event)">
             <label for="rows">Rows</label>
-            <input type="text" data-type="int" id="rows" name="rows">
+            <input type="text" id="rows" name="rows">
             <br>
             <label for="columns">Columns</label>
-            <input type="text" data-type="int" id="columns" name="columns">
+            <input type="text" id="columns" name="columns">
+            <br>
+            <label for="color-selection-mode">Color Selection Mode</label>
+            <select id="color-selection-mode" name="colorSelectionMode">
+                <option value="random">Random</option>
+                <option value="sequential">Sequential</option>
+            </select>
+            <br>
+            <label for="colors">Colors (R,G,B)</label>
+            <div id="colorInputs">
+            <div class="colorInput"><input type="text" class="colors" name="colors[]" value="0,0,0"> <a class="addColor" onClick="addColor(this)">+</a>/<a class="removeColor" onClick="removeColor(this)">-</a></div>
+            <div class="colorInput"><input type="text" class="colors" name="colors[]" value="255,0,0"> <a class="addColor" onClick="addColor(this)">+</a>/<a class="removeColor" onClick="removeColor(this)">-</a></div>
+            <div class="colorInput"><input type="text" class="colors" name="colors[]" value="0,255,0"> <a class="addColor" onClick="addColor(this)">+</a>/<a class="removeColor" onClick="removeColor(this)">-</a></div>
+            <div class="colorInput"><input type="text" class="colors" name="colors[]" value="0,0,255"> <a class="addColor" onClick="addColor(this)">+</a>/<a class="removeColor" onClick="removeColor(this)">-</a></div>
+            </div>
             <button id="submit">Generate</button>
         </form>
     </div>

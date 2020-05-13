@@ -1,5 +1,6 @@
 import cv2
 import random
+import numpy as np
 from flask import Flask, make_response, render_template, request
 from .config import Config
 import os
@@ -49,6 +50,7 @@ def generate():
         return response, 400
     rows = data.get('rows', 8)
     columns = data.get('columns', 8)
+    color_selection_mode = data.get("colorSelectionMode", "random")
     colors = data.get('colors', [[0, 0, 0], [255, 0, 0], [0, 255, 0], [0, 0, 255]])
     
     sprite_grid = []
@@ -57,8 +59,15 @@ def generate():
         row = []
         # fill the row with sprites
         for x in range(columns):
-            sprite = random.choice(sprites)
-            # TODO: perform any modifications of the base sprite here
+            sprite = random.choice(sprites).copy()
+            
+            # change color of the sprite
+            if color_selection_mode == "random":
+                color = random.choice(colors)
+            elif color_selection_mode == "sequential":
+                color = colors[x % len(colors)]
+            sprite[np.where((sprite == [0, 0, 0]).all(axis=2))] = color
+            
             row.append(sprite)
         sprite_grid.append(row)
     
