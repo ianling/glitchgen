@@ -40,6 +40,9 @@ Example JSON payload (with comments):
     # RNG seed (null to select a random seed on the server)
     "seed": "abcdefg",
     
+    # can be used to generate multiple full images and overlap them
+    "iterations": 2,
+    
     # controls how colors are selected for sprites. string
     # "random" = selects colors at random from available colors array
     # "sequential" = selects colors in the order provided in the array, repeating when it reaches the end of the array
