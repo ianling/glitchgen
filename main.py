@@ -60,7 +60,7 @@ def generate_image(rows, columns, iterations, color_selection_mode, colors):
 
             r, g, b, a = sprite.T
             black_areas = (r == 0) & (g == 0) & (b == 0) & (a == 255)
-            sprite[..., :][black_areas.T] = color + [255]
+            sprite[..., :][black_areas.T] = color
             #sprite[np.where((sprite == [0, 0, 0, 255]).all(axis=2))] = color
             
             row.append(sprite)
@@ -100,11 +100,17 @@ def generate():
     iterations = data.get('iterations', 2)
     color_selection_mode = data.get("colorSelectionMode", "random")
     colors = data.get('colors', [[0, 0, 0], [255, 0, 0], [0, 255, 0], [0, 0, 255]])
+    # convert colors from RGB to BGR (used by cv2)
+    for color in colors:
+        color.reverse()
+        # add alpha channel
+        color += [255]
     
     # set seed here so it influences request from beginning to end
     random.seed(seed)
 
     image = generate_image(rows, columns, iterations, color_selection_mode, colors)
+    print(image)
     _, buffer = cv2.imencode('.png', image)
     response = make_response(buffer.tobytes())
     response.headers['Content-Type'] = 'image/png'
