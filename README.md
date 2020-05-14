@@ -37,6 +37,9 @@ Example JSON payload (with comments):
     # number of columns of sprites. integer
     "columns": 10,
     
+    # RNG seed (null to select a random seed on the server)
+    "seed": "abcdefg",
+    
     # controls how colors are selected for sprites. string
     # "random" = selects colors at random from available colors array
     # "sequential" = selects colors in the order provided in the array, repeating when it reaches the end of the array
@@ -50,6 +53,6 @@ Example JSON payload (with comments):
 # todo
 To-do list in no particular order:
 
-- overlap multiple full grids with each other
 - random chance to overlap individual sprites (like a "corruptor" or something)
 - multiple colors in each sprite
+- add some way to show the seed used when the server randomly generates one (or generate one client-side instead)

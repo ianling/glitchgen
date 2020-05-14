@@ -6,6 +6,8 @@ function generate(e) {
     
     data['rows'] = parseInt(form['rows'].value);
     data['columns'] = parseInt(form['columns'].value);
+    data['seed'] = form['seed'].value ? form['seed'].value : null;
+    data['iterations'] = parseInt(form['iterations'].value);
     data['colorSelectionMode'] = form['colorSelectionMode'].value;
     
     // parse and reformat the colors arrays before adding to JSON

@@ -10,50 +10,41 @@ app = Flask(__name__)
 config = Config("config.cfg")
 
 
-def get_all_sprites():
+def _get_all_sprites():
     sprites = []
     sprite_files = os.listdir(config.sprites_dir)
+    i = 0
     for sprite_file in sprite_files:
-        sprite = cv2.imread(os.path.join(config.sprites_dir, sprite_file))
+        sprite = cv2.imread(os.path.join(config.sprites_dir, sprite_file), cv2.IMREAD_UNCHANGED)
+        if i == 0:
+            print(sprite)
+            i +=1
         sprites.append(sprite)
     return sprites
 
+
 # https://note.nkmk.me/en/python-opencv-hconcat-vconcat-np-tile/
-def concat_sprites(im_list_2d):
+def _concat_sprites(im_list_2d):
     return cv2.vconcat([cv2.hconcat(im_list_h) for im_list_h in im_list_2d])
 
 
-@app.route('/')
-def builder():
-    return render_template('index.html')
+def _merge_images(image1, image2):
+    #return cv2.addWeighted(image1, 0.5, image2, 0.5, 0.0)
+    rows,cols,channels = image2.shape
+    roi = image1[0:rows, 0:cols ]
+    img2gray = cv2.cvtColor(image2,cv2.COLOR_BGR2GRAY)
+    ret, mask = cv2.threshold(img2gray, 200, 255, cv2.THRESH_BINARY_INV)
+    mask_inv = cv2.bitwise_not(mask)
+    img1_bg = cv2.bitwise_and(roi, roi, mask=mask_inv)
+    img2_fg = cv2.bitwise_and(image2, image2, mask=mask)
+    out_img = cv2.add(img1_bg,img2_fg)
+    return out_img
 
 
-@app.route('/generate', methods=['POST'])
-def generate():
-    """
-    Returns a collage of sprites as an image.
-    
-    Accepts POST requests with a JSON body.
-    The following variables can be submitted in the JSON body:
-        rows=<int> [8]
-        columns=<int> [8]
-        colors=<two-dimensional array of colors in RGB format> [ [[0, 0, 0], [255, 0, 0], [0, 255, 0], [0, 0, 255]] ]
-        
-    Example POST request body:
-        {"rows":5,"columns":7,colors:[[100,100,100],[0,0,0]]}  (generates an image with 5 rows and 7 columns, with only the colors gray and black)
-    """
-
-    sprites = get_all_sprites()
-    data = request.json
-    if data is None:
-        response = make_response("you fudged up")
-        return response, 400
-    rows = data.get('rows', 8)
-    columns = data.get('columns', 8)
-    color_selection_mode = data.get("colorSelectionMode", "random")
-    colors = data.get('colors', [[0, 0, 0], [255, 0, 0], [0, 255, 0], [0, 0, 255]])
-    
+def generate_image(rows, columns, iterations, color_selection_mode, colors):
+    sprites = _get_all_sprites()
     sprite_grid = []
+    
     # generate rows of sprites
     for y in range(rows):
         row = []
@@ -66,16 +57,55 @@ def generate():
                 color = random.choice(colors)
             elif color_selection_mode == "sequential":
                 color = colors[x % len(colors)]
-            sprite[np.where((sprite == [0, 0, 0]).all(axis=2))] = color
+
+            r, g, b, a = sprite.T
+            black_areas = (r == 0) & (g == 0) & (b == 0) & (a == 255)
+            sprite[..., :][black_areas.T] = color + [255]
+            #sprite[np.where((sprite == [0, 0, 0, 255]).all(axis=2))] = color
             
             row.append(sprite)
         sprite_grid.append(row)
     
-    # build the final image using the 2d array of sprites
-    final_image = concat_sprites(sprite_grid)
+    # build the image using the 2d array of sprites
+    image = _concat_sprites(sprite_grid)
     
-    # display the final image on the webpage
-    _, buffer = cv2.imencode('.png', final_image)
+    # run this function recursively until we get through all the requested iterations
+    while iterations > 1:
+        image = _merge_images(image, generate_image(rows, columns, 1, color_selection_mode, colors))
+        iterations -= 1
+
+    # return cv2 image
+    return image
+
+
+@app.route('/')
+def builder():
+    return render_template('index.html')
+
+
+@app.route('/generate', methods=['POST'])
+def generate():
+    """
+    Returns a collage of sprites as an image.
+    
+    Accepts POST requests with a JSON body. See README.md for more details
+    """
+    data = request.json
+    if data is None:
+        response = make_response("you fudged up")
+        return response, 400
+    rows = data.get('rows', 8)
+    columns = data.get('columns', 8)
+    seed = data.get('seed', None)
+    iterations = data.get('iterations', 2)
+    color_selection_mode = data.get("colorSelectionMode", "random")
+    colors = data.get('colors', [[0, 0, 0], [255, 0, 0], [0, 255, 0], [0, 0, 255]])
+    
+    # set seed here so it influences request from beginning to end
+    random.seed(seed)
+
+    image = generate_image(rows, columns, iterations, color_selection_mode, colors)
+    _, buffer = cv2.imencode('.png', image)
     response = make_response(buffer.tobytes())
     response.headers['Content-Type'] = 'image/png'
     
