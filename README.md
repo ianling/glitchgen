@@ -4,8 +4,10 @@ Randomly generates glitch pattern collages.
 Runs a Flask webserver with a small GUI for modifying image generation parameters,
 and exposes a JSON API endpoint for creating images programmatically.
 
-Sprites are loaded from the sprites folder and added to the collage at random. 
+Collages are made up of sprites, which are loaded from the sprites folder and added to the collage at random. 
 Black pixels in sprites are replaced with user-specified colors.
+
+![Example](https://user-images.githubusercontent.com/830113/81886722-44a8ee00-9552-11ea-9c32-aaeba72f13e8.png)
 
 # requirements
 - python3
